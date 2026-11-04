@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 474ce57d7c1704418af05d72d996ae5e
+guid: 798197e04d16db64db2ffdd844c003cb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3684732902739343859
-    second: 2d-template_0
+      213: 2683721289175020666
+    second: teto squees_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -102,13 +102,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 2d-template_0
+      name: teto squees_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1400
-        height: 400
+        width: 374
+        height: 374
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -117,8 +117,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3f9f8ff6d0dc22330800000000000000
-      internalID: 3684732902739343859
+      spriteID: a743e652b4e7e3520800000000000000
+      internalID: 2683721289175020666
       vertices: []
       indices: 
       edges: []
@@ -137,7 +137,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      2d-template_0: 3684732902739343859
+      teto squees_0: 2683721289175020666
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
