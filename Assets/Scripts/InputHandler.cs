@@ -6,24 +6,33 @@ public struct PlayerInput
 
     public Vector2 AimDirection;
 
-    public bool Jump;
+    public bool JumpPressed;
+
+    public bool JumpHeld;
+
+    public bool JumpReleased;
 
     public bool Throw;
 
-    public bool Dash;
+    public bool DashPressed;
 }
-
 
 public class InputHandler : MonoBehaviour
 {
     PlayerActions _inputActions;
 
+    [SerializeField] float moveVectorDeadZone = 0.4f;
+
     void Start()
     {
-       
+        _inputActions = new PlayerActions();
+        _inputActions.Enable();
     }
 
-
+    void OnDestroy()
+    {
+        _inputActions.Dispose();
+    }
 
     public PlayerInput GetPlayerInput()
     {
@@ -32,11 +41,20 @@ public class InputHandler : MonoBehaviour
         PlayerInput playerInput = new PlayerInput()
         {
             Move = input.Move.ReadValue<Vector2>(),
-            Jump = input.Jump.IsPressed(),
+
+            JumpPressed = input.Jump.WasPressedThisFrame(),
+            JumpHeld = input.Jump.IsPressed(),
+            JumpReleased = input.Jump.WasReleasedThisFrame(),
+
             Throw = input.Throw.IsPressed(),
-            Dash = input.Dash.IsPressed(),
+            DashPressed = input.Dash.IsPressed(),
             AimDirection = input.AimDirection.ReadValue<Vector2>()
         };
+
+        if (playerInput.Move.magnitude < moveVectorDeadZone)
+        {
+            playerInput.Move = Vector2.zero;
+        }
 
         return playerInput;
     }

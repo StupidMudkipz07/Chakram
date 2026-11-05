@@ -1,5 +1,6 @@
+using System;
+using Unity.Mathematics;
 using UnityEngine;
-
 
 
 public class PlayerController : MonoBehaviour
@@ -9,65 +10,93 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float aerialMoveSpeed = 10;
     [SerializeField] float gravity = 5;
     [SerializeField] float jumpForce = 15;
+    [SerializeField] float minimalJumpForce = 1;
+    [SerializeField] float jumpBufferInSeconds = 1;
 
 
     [Header("References")]
     [SerializeField] Rigidbody2D _rb;
     [SerializeField] CollisionChecker _groundCheck;
 
+    [SerializeField] InputHandler inputHandler;
 
-    PlayerActions _inputActions;
-    PlayerActions.GamePlayActions _currrentInput;
+    PlayerInput _input;
+    float _jumpBufferTime;
+    float _previousYVelocity;
 
 
-
-
-    void Start()
+    // Capture input in the input update loop; physics may run less often.
+    void Update()
     {
-        _inputActions = new PlayerActions();
-        _inputActions.Enable();
-        _currrentInput = _inputActions.GamePlay;
-    }
+        _input = inputHandler.GetPlayerInput();
 
-    void OnDestroy()
-    {
-        _inputActions.Dispose();
+        if (_input.JumpPressed)
+        {
+            _jumpBufferTime = jumpBufferInSeconds;
+        }
     }
-
-    //visuals here only
-    void Update() { }
 
     //physics here
     void FixedUpdate()
     {
-
+        UpdateValues();
 
         ChangeVelocity();
+    }
+
+    void UpdateValues()
+    {
+        _jumpBufferTime = MathF.Max(_jumpBufferTime - Time.fixedDeltaTime, 0);
     }
 
     void ChangeVelocity()
     {
 
-        var targetVelocity = new Vector2(0, 0f);
-
+        Vector2 targetVelocity = Vector2.zero;
 
         // is grounded
         if (_groundCheck.IsTouching)
         {
-            targetVelocity = new Vector2(_currrentInput.Move.ReadValue<Vector2>().x * groundedMoveSpeed, 0f);
+            targetVelocity = new Vector2(_input.Move.x * groundedMoveSpeed, 0f);
+
+            //jump if there is buffertime left
+            if (_jumpBufferTime > 0)
+            {
+                _jumpBufferTime = 0;
+                targetVelocity.y = jumpForce;
+            }
         }
+
         // is airborne
         else
         {
-            targetVelocity = new Vector2(_currrentInput.Move.ReadValue<Vector2>().x * groundedMoveSpeed, _rb.linearVelocity.y - gravity);
+            targetVelocity = new Vector2(_input.Move.x * aerialMoveSpeed, _rb.linearVelocity.y - gravity);
+
+
+            //the player is rising
+            if (targetVelocity.y > 0)
+            {
+                //allows you to cut your jump short if you realease the jump
+                if (!_input.JumpHeld)
+                {
+                    targetVelocity.y = MathF.Min(minimalJumpForce, targetVelocity.y);
+                }
+            }
+            //the player is at the peak of its jump or is falling
+            else //targetVelocity.y <= 0
+            {
+                //the previous frame the velocity was postive so hang time should be activated
+                if (_previousYVelocity > 0)
+                {
+                    
+                }
+            }
+
         }
 
-        if (_currrentInput.Jump.IsPressed())
-        {
-            targetVelocity.y = jumpForce;
-        }
-
+        //targetVelocity *= Time.fixedDeltaTime;
         _rb.linearVelocity = targetVelocity;
-    }
 
+        _previousYVelocity = targetVelocity.y;
+    }
 }
