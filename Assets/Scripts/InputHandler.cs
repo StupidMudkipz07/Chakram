@@ -47,7 +47,7 @@ public class InputHandler : MonoBehaviour
             JumpReleased = input.Jump.WasReleasedThisFrame(),
 
             Throw = input.Throw.IsPressed(),
-            DashPressed = input.Dash.IsPressed(),
+            DashPressed = input.Dash.WasPressedThisFrame(),
             AimDirection = input.AimDirection.ReadValue<Vector2>()
         };
 

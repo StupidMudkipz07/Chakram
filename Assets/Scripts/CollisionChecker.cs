@@ -19,7 +19,6 @@ public class CollisionChecker : MonoBehaviour
         {
             IsTouching = true;
         }
-        Debug.Log("anton");
     }
 
     private void OnTriggerExit2D(Collider2D other)
