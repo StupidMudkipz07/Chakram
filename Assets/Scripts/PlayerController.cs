@@ -24,6 +24,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float dashDuration;
     [SerializeField] float dashCooldown;
 
+
+    [Header("Chakram")]
+
+    [SerializeField] float ChakramThrowSpeed;
+    
+
     PlayerInput _input;
     float _jumpBufferTime;
     float _hangTimer;
@@ -38,12 +44,13 @@ public class PlayerController : MonoBehaviour
     [Header("References")]
     [SerializeField] Rigidbody2D _rb;
     [SerializeField] CollisionChecker _groundCheck;
-    [SerializeField] InputHandler inputHandler;
+    [SerializeField] InputHandler _inputHandler;
+    [SerializeField] ChakramController chakram;
 
     // Capture input in the input update loop; physics may run less often.
     void Update()
     {
-        _input = inputHandler.GetPlayerInput();
+        _input = _inputHandler.GetPlayerInput();
 
         if (_input.JumpPressed)
         {
@@ -65,7 +72,7 @@ public class PlayerController : MonoBehaviour
         {
             HorizontalSpeed();
             VerticalSpeed();
-
+            CheckThrow();
         }
         else
         {
@@ -74,6 +81,20 @@ public class PlayerController : MonoBehaviour
 
         ChangeVelocity();
     }
+
+    #region Throw
+
+    void CheckThrow()
+    {
+        if (_input.Throw)
+        {
+            chakram.Throw(_input.AimDirection * ChakramThrowSpeed);
+        }
+    }
+
+    #endregion
+
+    #region Movement
 
     void UpdateValues()
     {
@@ -167,4 +188,6 @@ public class PlayerController : MonoBehaviour
     {
         _rb.linearVelocity = velocity;
     }
+
+    #endregion
 }

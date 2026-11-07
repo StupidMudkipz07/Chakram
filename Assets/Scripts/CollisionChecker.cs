@@ -5,17 +5,18 @@ public class CollisionChecker : MonoBehaviour
     [HideInInspector] public bool IsTouching;
 
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private Collider2D collider;
 
-    [SerializeField] Collider2D collider;
-
-    void Start()
+    bool IsGroundLayer(int layer)
     {
-        
+        // Bitwise check: is the object's layer part of the ground mask?5
+        return (groundLayer.value & (1 << layer)) != 0;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if ((groundLayer.value & (1 << other.gameObject.layer)) != 0)
+        // Check whether the colliding object is on a layer included in the ground mask.
+        if (IsGroundLayer(other.gameObject.layer))
         {
             IsTouching = true;
         }
@@ -23,7 +24,8 @@ public class CollisionChecker : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if ((groundLayer.value & (1 << other.gameObject.layer)) != 0)
+        // Stop considering the ground touched once the object leaves the ground layer.
+        if (IsGroundLayer(other.gameObject.layer))
         {
             IsTouching = false;
         }
