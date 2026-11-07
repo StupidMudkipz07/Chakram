@@ -129,7 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 367278150}
   - component: {fileID: 367278151}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: PlayerHitbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -207,7 +207,7 @@ GameObject:
   m_Component:
   - component: {fileID: 412688870}
   - component: {fileID: 412688871}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: PlayerSprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1187,6 +1187,7 @@ GameObject:
   - component: {fileID: 679602290}
   - component: {fileID: 679602292}
   - component: {fileID: 679602291}
+  - component: {fileID: 679602293}
   m_Layer: 0
   m_Name: Chakram
   m_TagString: Untagged
@@ -1208,6 +1209,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1642541248}
+  - {fileID: 2067545411}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!58 &679602291
@@ -1271,8 +1273,23 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0
+--- !u!114 &679602293
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 679602289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e07cee64eae1354a94a1875c52a6acf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChakramController
+  PlayerCheck: {fileID: 2067545412}
+  _rb: {fileID: 679602292}
+  _isDisconnectedFromTarget: 0
 --- !u!1 &726726912
 GameObject:
   m_ObjectHideFlags: 0
@@ -1423,7 +1440,7 @@ GameObject:
   - component: {fileID: 1117712533}
   - component: {fileID: 1117712535}
   - component: {fileID: 1117712534}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2029,7 +2046,7 @@ GameObject:
   - component: {fileID: 1874107261}
   - component: {fileID: 1874107263}
   - component: {fileID: 1874107262}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2119,10 +2136,12 @@ MonoBehaviour:
   dashSpeed: 26
   dashDuration: 0.16
   dashCooldown: 0.5
+  ChakramThrowSpeed: 5
   _hasJumped: 0
   _rb: {fileID: 1874107261}
   _groundCheck: {fileID: 1117712534}
-  inputHandler: {fileID: 1874107262}
+  _inputHandler: {fileID: 1874107262}
+  chakram: {fileID: 679602293}
 --- !u!1 &1941532030
 GameObject:
   m_ObjectHideFlags: 0
@@ -2568,6 +2587,92 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!1 &2067545410
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2067545411}
+  - component: {fileID: 2067545413}
+  - component: {fileID: 2067545412}
+  m_Layer: 0
+  m_Name: PlayerGrabBox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2067545411
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2067545410}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 679602290}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2067545412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2067545410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2389aa7ab7b324439a61ae8f8750d85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CollisionChecker
+  IsTouching: 0
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  collider: {fileID: 2067545413}
+--- !u!58 &2067545413
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2067545410}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.36
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
