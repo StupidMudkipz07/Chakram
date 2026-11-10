@@ -28,7 +28,7 @@ public class PlayerController : MonoBehaviour
     [Header("Chakram")]
 
     [SerializeField] float ChakramThrowSpeed;
-    
+
 
     PlayerInput _input;
     float _jumpBufferTime;
@@ -61,6 +61,7 @@ public class PlayerController : MonoBehaviour
         {
             if (_dashCooldown <= 0) ExecuteDash();
         }
+        CheckThrow();
     }
 
     //physics here
@@ -72,7 +73,7 @@ public class PlayerController : MonoBehaviour
         {
             HorizontalSpeed();
             VerticalSpeed();
-            CheckThrow();
+
         }
         else
         {
@@ -86,7 +87,7 @@ public class PlayerController : MonoBehaviour
 
     void CheckThrow()
     {
-        if (_input.Throw)
+        if (_input.Throw && chakram.IsConnectedToTarget)
         {
             chakram.Throw(_input.AimDirection * ChakramThrowSpeed);
         }

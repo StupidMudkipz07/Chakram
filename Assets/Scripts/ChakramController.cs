@@ -1,12 +1,21 @@
+using System.Collections;
+using System.Threading;
 using UnityEngine;
+
 
 public class ChakramController : MonoBehaviour
 {
     [SerializeField] CollisionChecker PlayerCheck;
     [SerializeField] Rigidbody2D _rb;
 
-    [SerializeField]  bool _isDisconnectedFromTarget;
+    [SerializeField] Transform FollowTarget;
+    [SerializeField] float catchCooldown;
 
+    [SerializeField] public bool IsConnectedToTarget = true;
+    [SerializeField] bool _isCatchable = true;
+
+
+    Coroutine returnCoroutine;
 
     void Start()
     {
@@ -15,28 +24,45 @@ public class ChakramController : MonoBehaviour
 
     public void Throw(Vector2 throwDirection)
     {
-        _isDisconnectedFromTarget = false;
-        _rb.AddForce(throwDirection * 1000);
+        _rb.simulated = true;
+        IsConnectedToTarget = false;
+        //_rb.AddForce(throwDirection);
         Debug.Log("kast");
+        _isCatchable = false;
+
+        returnCoroutine = StartCoroutine(ReturnAfterDelay());
+    }
+
+    IEnumerator ReturnAfterDelay()
+    {
+        yield return new WaitForSeconds(catchCooldown);
+
+        _isCatchable = true;
+    }
+
+    void FollowPlayer()
+    {
+        transform.position = FollowTarget.position;
     }
 
     void Update()
     {
         //touched player
-        if (PlayerCheck.IsTouching)
+        if (PlayerCheck.IsTouching && _isCatchable)
         {
-            _isDisconnectedFromTarget = true;
+            _rb.simulated = false;
+            IsConnectedToTarget = true;
             Debug.Log("nuddade SPelaren");
         }
-
-        if (_isDisconnectedFromTarget)
+        // slop
+        if (!IsConnectedToTarget)
         {
 
         }
         //following player
         else
         {
-            
+            FollowPlayer();
         }
     }
 }
