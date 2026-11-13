@@ -29,10 +29,12 @@ public class ChakramController : MonoBehaviour
         _rb.simulated = true;
         IsConnectedToTarget = false;
         _rb.linearVelocity = Vector2.zero;
+        _rb.gravityScale = 0;
+        _isCatchable = false;
 
         _rb.AddForce(throwDirection);
         Debug.Log("kast");
-        _isCatchable = false;
+
 
         StartCoroutine(ReturnAfterDelay());
         StartCoroutine(StartSlowdownCooldown());
