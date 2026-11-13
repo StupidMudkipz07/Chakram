@@ -29,7 +29,6 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] float ChakramThrowSpeed;
 
-
     PlayerInput _input;
     float _jumpBufferTime;
     float _hangTimer;
@@ -89,7 +88,8 @@ public class PlayerController : MonoBehaviour
     {
         if (_input.Throw && chakram.IsConnectedToTarget)
         {
-            chakram.Throw(_input.AimDirection * ChakramThrowSpeed);
+            Debug.Log(_input.AimDirection);
+            chakram.Throw(_input.AimDirection.normalized * ChakramThrowSpeed);
         }
     }
 

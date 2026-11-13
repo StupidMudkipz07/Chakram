@@ -5,17 +5,19 @@ using UnityEngine;
 
 public class ChakramController : MonoBehaviour
 {
+
+    [Header("Stats")]
+    [SerializeField] float catchCooldown;
+    [SerializeField] float slowdownCooldown;
+
+    [Header("References")]
     [SerializeField] CollisionChecker PlayerCheck;
     [SerializeField] Rigidbody2D _rb;
-
     [SerializeField] Transform FollowTarget;
-    [SerializeField] float catchCooldown;
 
-    [SerializeField] public bool IsConnectedToTarget = true;
-    [SerializeField] bool _isCatchable = true;
-
-
-    Coroutine returnCoroutine;
+    public bool IsConnectedToTarget = true;
+    bool _isCatchable = true;
+    bool _startSlowdown;
 
     void Start()
     {
@@ -26,11 +28,14 @@ public class ChakramController : MonoBehaviour
     {
         _rb.simulated = true;
         IsConnectedToTarget = false;
-        //_rb.AddForce(throwDirection);
+        _rb.linearVelocity = Vector2.zero;
+
+        _rb.AddForce(throwDirection);
         Debug.Log("kast");
         _isCatchable = false;
 
-        returnCoroutine = StartCoroutine(ReturnAfterDelay());
+        StartCoroutine(ReturnAfterDelay());
+        StartCoroutine(StartSlowdownCooldown());
     }
 
     IEnumerator ReturnAfterDelay()
@@ -38,6 +43,13 @@ public class ChakramController : MonoBehaviour
         yield return new WaitForSeconds(catchCooldown);
 
         _isCatchable = true;
+    }
+
+    IEnumerator StartSlowdownCooldown()
+    {
+        yield return new WaitForSeconds(slowdownCooldown);
+
+        _startSlowdown = true;
     }
 
     void FollowPlayer()
@@ -57,7 +69,10 @@ public class ChakramController : MonoBehaviour
         // slop
         if (!IsConnectedToTarget)
         {
-
+            if (_startSlowdown)
+            {
+                _rb.gravityScale = 1;
+            }
         }
         //following player
         else

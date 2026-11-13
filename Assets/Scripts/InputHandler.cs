@@ -23,6 +23,8 @@ public class InputHandler : MonoBehaviour
 
     [SerializeField] float moveVectorDeadZone = 0.4f;
 
+    [SerializeField] float aimVectorDeadZone = 0.5f;
+
     void Start()
     {
         _inputActions = new PlayerActions();
@@ -51,9 +53,16 @@ public class InputHandler : MonoBehaviour
             AimDirection = input.AimDirection.ReadValue<Vector2>()
         };
 
+        //dont accept too small vectors
         if (playerInput.Move.magnitude < moveVectorDeadZone)
         {
             playerInput.Move = Vector2.zero;
+        }
+
+        //dont accept too small vectors
+        if (playerInput.AimDirection.magnitude < aimVectorDeadZone)
+        {
+            playerInput.AimDirection = Vector2.zero;
         }
 
         return playerInput;
