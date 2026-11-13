@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -26,25 +27,29 @@ public class PlayerController : MonoBehaviour
 
 
     [Header("Chakram")]
-
     [SerializeField] float ChakramThrowSpeed;
 
+    [Header("debug")]
     PlayerInput _input;
     float _jumpBufferTime;
     float _hangTimer;
-    [SerializeField] bool _hasJumped;
-    float _dashTimer;
+    bool _hasJumped;
     Vector2 _dashDirection;
     float _dashCooldown;
 
+    [SerializeField] bool _isDashing;
+
     //velocity
-    Vector2 velocity;
+    public Vector2 velocity;
 
     [Header("References")]
     [SerializeField] Rigidbody2D _rb;
     [SerializeField] CollisionChecker _groundCheck;
+    [SerializeField] CollisionChecker _roofCheck;
+
     [SerializeField] InputHandler _inputHandler;
     [SerializeField] ChakramController chakram;
+
 
     // Capture input in the input update loop; physics may run less often.
     void Update()
@@ -58,7 +63,11 @@ public class PlayerController : MonoBehaviour
 
         if (_input.DashPressed)
         {
-            if (_dashCooldown <= 0) ExecuteDash();
+            if (_dashCooldown <= 0)
+            {
+
+                StartCoroutine(Dash());
+            }
         }
         CheckThrow();
     }
@@ -68,15 +77,11 @@ public class PlayerController : MonoBehaviour
     {
         UpdateValues();
 
-        if (_dashTimer <= 0)
-        {
+        if (!_isDashing)
+        {//isnt dashing
             HorizontalSpeed();
             VerticalSpeed();
 
-        }
-        else
-        {
-            DuringDash();
         }
 
         ChangeVelocity();
@@ -101,7 +106,6 @@ public class PlayerController : MonoBehaviour
     {
         _jumpBufferTime = MathF.Max(_jumpBufferTime - Time.fixedDeltaTime, 0);
         _hangTimer = MathF.Max(_hangTimer - Time.fixedDeltaTime, 0);
-        _dashTimer = MathF.Max(_dashTimer - Time.fixedDeltaTime, 0);
         _dashCooldown = MathF.Max(_dashCooldown - Time.fixedDeltaTime, 0);
     }
 
@@ -116,16 +120,6 @@ public class PlayerController : MonoBehaviour
         _jumpBufferTime = 0;
         velocity.y = jumpForce;
         _hasJumped = true;
-    }
-
-    void ExecuteDash()
-    {
-        _dashDirection = _input.Move;
-        _dashTimer = dashDuration;
-        _dashCooldown = dashCooldown + dashDuration;
-
-        _hasJumped = false;
-        _hangTimer = 0;
     }
 
     void VerticalSpeed()
@@ -144,8 +138,8 @@ public class PlayerController : MonoBehaviour
         }
         //airborne
         else
-        {   //rising
-            if (_rb.linearVelocity.y > 0)
+        {
+            if (_rb.linearVelocity.y > 0)  //rising
             {
                 if (_groundCheck.IsTouching)
                 {
@@ -159,8 +153,7 @@ public class PlayerController : MonoBehaviour
                     _hasJumped = false;
                 }
             }
-            //the player is at the peak of its jump or is falling
-            else //targetVelocity.y <= 0
+            else  //the player is at the peak of its jump or is falling
             {
                 if (_hasJumped)
                 {
@@ -171,13 +164,33 @@ public class PlayerController : MonoBehaviour
                 }
             }
 
-            if (_dashTimer <= 0)
-            {
-                //graviy handling 
-                var actualGravity = _hangTimer <= 0 ? gravity : hangTimeGravity;
-                velocity.y -= actualGravity * Time.fixedDeltaTime;
-            }
+            var actualGravity = _hangTimer <= 0 ? gravity : hangTimeGravity;
+            velocity.y -= actualGravity * Time.fixedDeltaTime;
         }
+
+        //touching roof 
+        if (_roofCheck.IsTouching)
+        {
+            velocity.y = -1;
+        }
+    }
+
+    IEnumerator Dash()
+    {
+        //before dash
+        _dashDirection = _input.Move;
+
+        velocity = _dashDirection * dashSpeed;
+        _isDashing = true;
+        _dashCooldown = dashCooldown + dashDuration;
+        _hangTimer = 0;
+
+        yield return new WaitForSeconds(dashDuration);
+
+        //after dash
+        velocity = Vector2.zero;
+        _isDashing = false;
+        _hasJumped = true; //stänger av hangtime, kanske kan vara true
     }
 
     void DuringDash()

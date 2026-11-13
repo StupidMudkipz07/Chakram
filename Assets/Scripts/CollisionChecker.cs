@@ -4,13 +4,13 @@ public class CollisionChecker : MonoBehaviour
 {
     [HideInInspector] public bool IsTouching;
 
-    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask targetLayer;
     [SerializeField] private Collider2D collider;
 
     bool IsGroundLayer(int layer)
     {
         // Bitwise check: is the object's layer part of the ground mask?5
-        return (groundLayer.value & (1 << layer)) != 0;
+        return (targetLayer.value & (1 << layer)) != 0;
     }
 
     private void OnTriggerEnter2D(Collider2D other)

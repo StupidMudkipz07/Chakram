@@ -10,7 +10,7 @@ public class ChakramController : MonoBehaviour
     [Header("Stats")]
     [SerializeField] float catchCooldown;
     [SerializeField] float slowdownCooldown;
-    [SerializeField] float slowdown;
+    [SerializeField] float slowdownAmount = 5;
     [SerializeField] float setGravity = 1;
 
     [Header("References")]
@@ -21,6 +21,8 @@ public class ChakramController : MonoBehaviour
     public bool IsConnectedToTarget = true;
     bool _isCatchable = true;
     bool _startSlowdown;
+
+    Coroutine _slowdownCoroutine;
 
     void Start()
     {
@@ -41,11 +43,15 @@ public class ChakramController : MonoBehaviour
         Debug.Log("kast");
 
         //start countdowns
-        StartCoroutine(ReturnAfterDelay());
-        StartCoroutine(StartSlowdownCooldown());
+        StartCoroutine(MakeCatchableAfterDelay());
+
+        //stoppa rutinen om den fortfarande är igång
+        if (_slowdownCoroutine != null) StopCoroutine(_slowdownCoroutine);
+
+        _slowdownCoroutine = StartCoroutine(StartSlowdownCooldown());
     }
 
-    IEnumerator ReturnAfterDelay()
+    IEnumerator MakeCatchableAfterDelay()
     {
         yield return new WaitForSeconds(catchCooldown);
 
@@ -79,7 +85,7 @@ public class ChakramController : MonoBehaviour
             if (_startSlowdown)
             {
                 _rb.gravityScale = setGravity;
-                _rb.linearVelocity = Vector2.Lerp(_rb.linearVelocity, Vector2.zero, slowdown * Time.fixedDeltaTime);
+                _rb.linearVelocity = Vector2.Lerp(_rb.linearVelocity, Vector2.zero, slowdownAmount * Time.fixedDeltaTime);
             }
         }
         //following player
