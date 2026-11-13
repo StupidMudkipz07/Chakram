@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Threading;
 using UnityEngine;
@@ -9,6 +10,8 @@ public class ChakramController : MonoBehaviour
     [Header("Stats")]
     [SerializeField] float catchCooldown;
     [SerializeField] float slowdownCooldown;
+    [SerializeField] float slowdown;
+    [SerializeField] float setGravity = 1;
 
     [Header("References")]
     [SerializeField] CollisionChecker PlayerCheck;
@@ -27,15 +30,17 @@ public class ChakramController : MonoBehaviour
     public void Throw(Vector2 throwDirection)
     {
         _rb.simulated = true;
-        IsConnectedToTarget = false;
         _rb.linearVelocity = Vector2.zero;
         _rb.gravityScale = 0;
         _isCatchable = false;
+        _startSlowdown = false;
+
+        IsConnectedToTarget = false;
 
         _rb.AddForce(throwDirection);
         Debug.Log("kast");
 
-
+        //start countdowns
         StartCoroutine(ReturnAfterDelay());
         StartCoroutine(StartSlowdownCooldown());
     }
@@ -59,7 +64,7 @@ public class ChakramController : MonoBehaviour
         transform.position = FollowTarget.position;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         //touched player
         if (PlayerCheck.IsTouching && _isCatchable)
@@ -68,12 +73,13 @@ public class ChakramController : MonoBehaviour
             IsConnectedToTarget = true;
             Debug.Log("nuddade SPelaren");
         }
-        // slop
+        //flying freely
         if (!IsConnectedToTarget)
         {
             if (_startSlowdown)
             {
-                _rb.gravityScale = 1;
+                _rb.gravityScale = setGravity;
+                _rb.linearVelocity = Vector2.Lerp(_rb.linearVelocity, Vector2.zero, slowdown * Time.fixedDeltaTime);
             }
         }
         //following player
