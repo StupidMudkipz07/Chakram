@@ -1509,6 +1509,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChakramController
   catchCooldown: 1
+  slowdownCooldown: 0.5
+  slowdown: 3
+  setGravity: 1
   PlayerCheck: {fileID: 679602294}
   _rb: {fileID: 679602292}
   FollowTarget: {fileID: 1874107259}
