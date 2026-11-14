@@ -3470,11 +3470,14 @@ MonoBehaviour:
   minimalJumpForce: 6
   jumpBufferInSeconds: 0.19
   hangTimeInSeconds: 0.05
-  hangTimeGravity: -4
+  hangTimeGravity: -8
   roofSpeedSet: -1
   dashSpeed: 26
   dashDuration: 0.2
   dashCooldown: 0.5
+  wallSlideSpeed: 2
+  wallJumpHeight: 16
+  wallJumpSpeed: 18
   ChakramThrowSpeed: 700
   _rb: {fileID: 1874107261}
   _groundCheck: {fileID: 1117712534}
@@ -3483,12 +3486,7 @@ MonoBehaviour:
   _rightWallCheck: {fileID: 431118985}
   _inputHandler: {fileID: 1874107262}
   chakram: {fileID: 679602293}
-  _jumpBufferTime: 0
-  _hangTimer: 0
-  _hasJumped: 0
-  _dashDirection: {x: 0, y: 0}
-  _dashCooldown: 0
-  _isDashing: 0
+  _isWallSliding: 0
   velocity: {x: 0, y: 0}
 --- !u!1 &1941532030
 GameObject:

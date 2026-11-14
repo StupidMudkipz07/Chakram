@@ -25,6 +25,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float dashDuration = 0.2f;
     [SerializeField] float dashCooldown = 0.56f;
 
+    [Header("Wall")]
+
+    [SerializeField] float wallSlideSpeed = 20;
+    [SerializeField] float wallJumpHeight = 20;
+    [SerializeField] float wallJumpSpeed = 50;
+
 
     [Header("Chakram")]
     [SerializeField] float ChakramThrowSpeed;
@@ -40,13 +46,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] ChakramController chakram;
 
     [Header("Debug stats")]
-    [SerializeField] float _jumpBufferTime;
-    [SerializeField] float _hangTimer;
-    [SerializeField] bool _hasJumped;
-    [SerializeField] Vector2 _dashDirection;
-    [SerializeField] float _dashCooldown;
-    [SerializeField] PlayerInput _input;
-    [SerializeField] bool _isDashing;
+    float _jumpBufferTime;
+    float _hangTimer;
+    bool _hasJumped;
+    Vector2 _dashDirection;
+    float _dashCooldown;
+    PlayerInput _input;
+    bool _isDashing;
+
+    [SerializeField] bool _isWallSliding;
 
     //velocity
     public Vector2 velocity;
@@ -76,15 +84,15 @@ public class PlayerController : MonoBehaviour
     {
         UpdateValues();
 
+        //isnt dashing
         if (!_isDashing)
-        {//isnt dashing
-            HorizontalSpeed();
+        {
+            HorizontalMovement();
+            WallSlideCheck();
             VerticalSpeed();
         }
 
         ChangeVelocity();
-
-        GetWallDirection();
     }
 
     #region Throw
@@ -108,7 +116,7 @@ public class PlayerController : MonoBehaviour
         _dashCooldown = MathF.Max(_dashCooldown - Time.fixedDeltaTime, 0);
     }
 
-    void HorizontalSpeed()
+    void HorizontalMovement()
     {
         float speed = _groundCheck.IsTouching ? groundedMoveSpeed : aerialMoveSpeed;
         velocity.x = Mathf.MoveTowards(velocity.x, _input.Move.x * speed, (_groundCheck.IsTouching ? groundedAcceleration : aerialAcceleration) * Time.fixedDeltaTime);
@@ -121,24 +129,46 @@ public class PlayerController : MonoBehaviour
         _hasJumped = true;
     }
 
+    void ExecuteWallJump()
+    {
+        _jumpBufferTime = 0;
+        velocity.y = wallJumpHeight;
+        _hasJumped = true;
+        //launches you out of the wall
+        velocity.x = wallJumpSpeed * -GetWallDirection().x;
+    }
+
     void VerticalSpeed()
     {
         //grounded
         if (_groundCheck.IsTouching)
         {
             velocity.y = 0;
-
             _hasJumped = false;
+
             //jump if there is buffertime left
             if (_jumpBufferTime > 0)
             {
                 ExecuteJump();
             }
         }
+        //wall Sliding
+        else if (_isWallSliding)
+        {
+            //if the player is moving up normal gravity is applied, otherwise apply wallgravity
+            var actualGravity = velocity.y > 0 ? gravity : wallSlideSpeed;
+            velocity.y -= actualGravity * Time.fixedDeltaTime;
+
+            //jump if there is buffertime left
+            if (_jumpBufferTime > 0)
+            {
+                ExecuteWallJump();
+            }
+        }
         //airborne
         else
         {
-            if (_rb.linearVelocity.y > 0)  //rising
+            if (_rb.linearVelocity.y > 0) //rising
             {
                 if (_groundCheck.IsTouching)
                 {
@@ -161,6 +191,10 @@ public class PlayerController : MonoBehaviour
             }
 
             var actualGravity = _hangTimer <= 0 ? gravity : hangTimeGravity;
+            // float actualGravity;
+            // if (_isWallSliding) actualGravity = wallSlideSpeed;
+            // else if (_hangTimer > 0) actualGravity = hangTimeGravity;
+            // else actualGravity = gravity;
             velocity.y -= actualGravity * Time.fixedDeltaTime;
         }
 
@@ -197,31 +231,48 @@ public class PlayerController : MonoBehaviour
         StartHangTime();
     }
 
-    //this may only be called during fixedUpdate
-    void ChangeVelocity()
-    {
-        _rb.linearVelocity = velocity;
-    }
-
-    #region wallCheckSlop
-
     Vector2 GetWallDirection()
     {
         //maybe fix edge case where to you collide with both colliders at the same time
         if (_leftWallCheck.IsTouching)
         {
             Debug.Log("touching left wall");
+            return Vector2.left;
         }
         else if (_rightWallCheck.IsTouching)
         {
             Debug.Log("touching right wall");
+            return Vector2.right;
         }
 
-                                                                
         return Vector2.zero;
     }
 
-    #endregion
+    void OnTouchingWall()
+    {
+        _isWallSliding = true;
+       // if (velocity.y < 0) velocity.y = 0;
+    }
 
+    void WallSlideCheck()
+    {
+        //player is in the air and touching a wall
+        if (GetWallDirection().x != 0 && !_groundCheck.IsTouching)
+        {
+            OnTouchingWall();
+        }
+        else
+        {
+            _isWallSliding = false;
+        }
+    }
+
+
+
+    //this may only be called during fixedUpdate
+    void ChangeVelocity()
+    {
+        _rb.linearVelocity = velocity;
+    }
     #endregion
 }
