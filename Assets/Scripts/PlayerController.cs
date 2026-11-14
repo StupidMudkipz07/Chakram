@@ -1,57 +1,57 @@
 using System;
 using System.Collections;
-using Unity.Mathematics;
 using UnityEngine;
 
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Stats")]
-    [SerializeField] float groundedMoveSpeed = 14;
-    [SerializeField] float groundedAcceleration = 14;
-    [SerializeField] float aerialMoveSpeed = 10;
-    [SerializeField] float aerialAcceleration = 10;
+    [SerializeField] float groundedMoveSpeed = 10;
+    [SerializeField] float groundedAcceleration = 400;
+    [SerializeField] float aerialMoveSpeed = 9;
+    [SerializeField] float aerialAcceleration = 180;
 
     [Header("Jump")]
-    [SerializeField] float gravity = 5;
-    [SerializeField] float jumpForce = 15;
-    [SerializeField] float minimalJumpForce = 1;
-    [SerializeField] float jumpBufferInSeconds = 1;
-    [SerializeField] float hangTimeInSeconds = 0.1f;
-    [SerializeField] float hangTimeGravity = 5;
+    [SerializeField] float gravity = 50;
+    [SerializeField] float jumpForce = 16;
+    [SerializeField] float minimalJumpForce = 6;
+    [SerializeField] float jumpBufferInSeconds = 0.19f;
+    [SerializeField] float hangTimeInSeconds = 0.05f;
+    [SerializeField] float hangTimeGravity = -4;
+    [SerializeField] float roofSpeedSet = -1;
 
     [Header("Dash")]
-    [SerializeField] float dashSpeed;
-    [SerializeField] float dashDuration;
-    [SerializeField] float dashCooldown;
+    [SerializeField] float dashSpeed = 27;
+    [SerializeField] float dashDuration = 0.2f;
+    [SerializeField] float dashCooldown = 0.56f;
 
 
     [Header("Chakram")]
     [SerializeField] float ChakramThrowSpeed;
 
-    [Header("debug")]
-    PlayerInput _input;
-    float _jumpBufferTime;
-    float _hangTimer;
-    bool _hasJumped;
-    Vector2 _dashDirection;
-    float _dashCooldown;
+    [Header("References")]
+    [SerializeField] Rigidbody2D _rb;
+    [SerializeField] CollisionChecker _groundCheck;
+    [SerializeField] CollisionChecker _roofCheck;
+    [SerializeField] CollisionChecker _leftWallCheck;
+    [SerializeField] CollisionChecker _rightWallCheck;
 
+    [SerializeField] InputHandler _inputHandler;
+    [SerializeField] ChakramController chakram;
+
+    [Header("Debug stats")]
+    [SerializeField] float _jumpBufferTime;
+    [SerializeField] float _hangTimer;
+    [SerializeField] bool _hasJumped;
+    [SerializeField] Vector2 _dashDirection;
+    [SerializeField] float _dashCooldown;
+    [SerializeField] PlayerInput _input;
     [SerializeField] bool _isDashing;
 
     //velocity
     public Vector2 velocity;
 
-    [Header("References")]
-    [SerializeField] Rigidbody2D _rb;
-    [SerializeField] CollisionChecker _groundCheck;
-    [SerializeField] CollisionChecker _roofCheck;
-
-    [SerializeField] InputHandler _inputHandler;
-    [SerializeField] ChakramController chakram;
-
-
-    // Capture input in the input update loop; physics may run less often.
+    // Capture input in the input update loop, physics may run less often. chatgpt ass comment
     void Update()
     {
         _input = _inputHandler.GetPlayerInput();
@@ -65,7 +65,6 @@ public class PlayerController : MonoBehaviour
         {
             if (_dashCooldown <= 0)
             {
-
                 StartCoroutine(Dash());
             }
         }
@@ -81,10 +80,11 @@ public class PlayerController : MonoBehaviour
         {//isnt dashing
             HorizontalSpeed();
             VerticalSpeed();
-
         }
 
         ChangeVelocity();
+
+        GetWallDirection();
     }
 
     #region Throw
@@ -93,7 +93,6 @@ public class PlayerController : MonoBehaviour
     {
         if (_input.Throw && chakram.IsConnectedToTarget)
         {
-            Debug.Log(_input.AimDirection);
             chakram.Throw(_input.AimDirection.normalized * ChakramThrowSpeed);
         }
     }
@@ -157,10 +156,7 @@ public class PlayerController : MonoBehaviour
             {
                 if (_hasJumped)
                 {
-                    //start hangtime
-                    Debug.Log("hangtime");
-                    _hangTimer = hangTimeInSeconds;
-                    _hasJumped = false;
+                    StartHangTime();
                 }
             }
 
@@ -171,8 +167,15 @@ public class PlayerController : MonoBehaviour
         //touching roof 
         if (_roofCheck.IsTouching)
         {
-            velocity.y = -1;
+            velocity.y = roofSpeedSet;
         }
+    }
+
+    void StartHangTime()
+    {
+        //Debug.Log("hangtime");
+        _hangTimer = hangTimeInSeconds;
+        _hasJumped = false;
     }
 
     IEnumerator Dash()
@@ -183,25 +186,42 @@ public class PlayerController : MonoBehaviour
         velocity = _dashDirection * dashSpeed;
         _isDashing = true;
         _dashCooldown = dashCooldown + dashDuration;
-        _hangTimer = 0;
+        _hasJumped = false; //stänger av hangtime, kanske kan vara true
 
         yield return new WaitForSeconds(dashDuration);
 
         //after dash
         velocity = Vector2.zero;
         _isDashing = false;
-        _hasJumped = true; //stänger av hangtime, kanske kan vara true
+
+        StartHangTime();
     }
 
-    void DuringDash()
-    {
-        velocity = _dashDirection * dashSpeed;
-    }
-
+    //this may only be called during fixedUpdate
     void ChangeVelocity()
     {
         _rb.linearVelocity = velocity;
     }
+
+    #region wallCheckSlop
+
+    Vector2 GetWallDirection()
+    {
+        //maybe fix edge case where to you collide with both colliders at the same time
+        if (_leftWallCheck.IsTouching)
+        {
+            Debug.Log("touching left wall");
+        }
+        else if (_rightWallCheck.IsTouching)
+        {
+            Debug.Log("touching right wall");
+        }
+
+                                                                
+        return Vector2.zero;
+    }
+
+    #endregion
 
     #endregion
 }

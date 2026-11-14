@@ -21,7 +21,7 @@ public class InputHandler : MonoBehaviour
 {
     PlayerActions _inputActions;
 
-    [SerializeField] float moveVectorDeadZone = 0.4f;
+    [SerializeField] float moveVectorDeadZone = 0.5f;
 
     [SerializeField] float aimVectorDeadZone = 0.5f;
 
